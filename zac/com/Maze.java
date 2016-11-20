@@ -8,7 +8,7 @@ import java.util.Stack;
 /**
  * Created by zac on 11/18/16.
  */
-public class Maze {
+class Maze {
 
     // 2D Cell array for whole maze class.
     private Cell[][] myMaze;
@@ -44,7 +44,7 @@ public class Maze {
      * @param height
      * @param theDebug
      */
-    public Maze(int width, int height, boolean theDebug) {
+    Maze(int width, int height, boolean theDebug) {
 
         // Row takes 2, 1 for border 1 for path, +1 for fence and post
         myRow = 2 * height + 1;
@@ -199,7 +199,7 @@ public class Maze {
     /**
      * Draw the actual Maze.
      */
-    public void drawMaze() {
+    void drawMaze() {
 
         for (int i=0; i<myRow; i++) {
 
@@ -230,40 +230,40 @@ public class Maze {
         System.out.println();
     }
 
-    /**
-     * Private class for individual maze cell.
-     */
-    private class Cell {
-
-        private int row;
-
-        private int col;
-
-        private boolean isBorder;
-
-        private boolean isVisited;
-
-        private boolean isStart;
-
-        private boolean isEnd;
-
-        private boolean isPath;
-
-        /**
-         * Constructor of Cell.
-         *
-         * @param theRow
-         * @param theCol
-         * @param theBorder
-         */
-        private Cell(int theRow, int theCol, boolean theBorder) {
-            row = theRow;
-            col = theCol;
-            isBorder = theBorder;
-            isVisited = false;
-            isStart = false;
-            isEnd = false;
-            isPath = false;
-        }
-    }
+//    /**
+//     * Private class for individual maze cell.
+//     */
+//    private class Cell {
+//
+//        private int row;
+//
+//        private int col;
+//
+//        private boolean isBorder;
+//
+//        private boolean isVisited;
+//
+//        private boolean isStart;
+//
+//        private boolean isEnd;
+//
+//        private boolean isPath;
+//
+//        /**
+//         * Constructor of Cell.
+//         *
+//         * @param theRow
+//         * @param theCol
+//         * @param theBorder
+//         */
+//        private Cell(int theRow, int theCol, boolean theBorder) {
+//            row = theRow;
+//            col = theCol;
+//            isBorder = theBorder;
+//            isVisited = false;
+//            isStart = false;
+//            isEnd = false;
+//            isPath = false;
+//        }
+//    }
 }
