@@ -1,5 +1,8 @@
 package zac.com;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 
 /**
@@ -23,7 +26,7 @@ public class Maze {
     private int myVisited;
 
     // Stack to record last step.
-    private Stack<Cell> myLastRightStep;
+    private Stack<Cell> myLastCorrectStep;
 
     // Stack to store solution.
     private Stack<Cell> mySolution;
@@ -56,7 +59,7 @@ public class Maze {
         myVisited = 0;
         myReachEnd = false;
 
-        myLastRightStep = new Stack<>();
+        myLastCorrectStep = new Stack<>();
         mySolution = new Stack<>();
 
         // Helper method to build a maze.
@@ -75,6 +78,7 @@ public class Maze {
                 if (i == 0 || i == myRow-1 || j == 0 || j == myCol-1)
                     myMaze[i][j] = new Cell(i, j, true);
 
+                // Regular Cell, not border, entry or end.
                 else
                     myMaze[i][j] = new Cell(i, j, false);
             }
@@ -86,8 +90,8 @@ public class Maze {
         myMaze[0][1].isStart = true;
 
         // Set up ending point.
-        myMaze[myRow-1][myCol-1].isBorder = false;
-        myMaze[myRow-1][myCol-1].isEnd = true;
+        myMaze[myRow-1][myCol-2].isBorder = false;
+        myMaze[myRow-1][myCol-2].isEnd = true;
 
         mazeHelper();
     }
@@ -96,20 +100,135 @@ public class Maze {
      * Helper method called inside buildMaze to draw actual maze.
      */
     private void mazeHelper() {
+        // Start point.
+        Cell cur = myMaze[1][1];
+        cur.isVisited = true;
 
+        // Push Cell to mySolution stack, myVisit +1.
+        mySolution.push(cur);
+        ++myVisited;
 
+        // An ArrayList to contain unvisited neighbors.
+        List<Cell> unvisitedNeighbors;
 
+        // A random decide which way to go next.
+        Random rand = new Random();
 
+        // Visit all Cells in the maze.
+        while (myVisited < myCellCount) {
+            // A list contains neighbor of unvisited Cells of current Cell.
+            unvisitedNeighbors = checkNeighbors(cur.row, cur.col);
 
+            // Current Cell has some unvisited neighbors.
+            if (unvisitedNeighbors.size() > 0) {
 
+                // Use random to determine next step
+                int nextStep = rand.nextInt(unvisitedNeighbors.size());
+                Cell next = unvisitedNeighbors.get(nextStep);
+                next.isVisited = true;
 
+                // Go up
+                if (next.row < cur.row) myMaze[cur.row - 1][cur.col].isPath = true;
 
+                    // Go down
+                else if (next.row > cur.row) myMaze[cur.row + 1][cur.col].isPath = true;
+
+                    // Go left
+                else if (next.col < cur.col) myMaze[cur.row][cur.col - 1].isPath = true;
+
+                    // Go right
+                else myMaze[cur.row][cur.col + 1].isPath = true;
+
+                // Store current Cell into myLastCorrectStep Stack.
+                myLastCorrectStep.push(cur);
+                // Update to next Cell.
+                cur = next;
+
+                // Check if reach the end.
+                if (cur.row == myRow - 2 && cur.col == myCol - 2) {
+                    myReachEnd = true;
+                    mySolution.push(cur);
+                }
+
+                // Only push solution path when not reaching the end, don't put into solution Stack if reaches the end.
+                if (!myReachEnd) mySolution.push(cur);
+
+                // Increment myVisit count.
+                ++myVisited;
+            }
+
+            // All visited and haven't reached the end, wrong way. Popup previous Cell route.
+            else {
+
+                if (!myLastCorrectStep.isEmpty()) cur = myLastCorrectStep.pop();
+
+                if (!mySolution.isEmpty() && !myReachEnd) mySolution.pop();
+            }
+        }
     }
 
+    /**
+     * This method checks neighbors of current Cell and return a List of unvisited Cells.
+     *
+     * @param theRow current Cell row
+     * @param theCol current Cell col
+     * @return A list contains all unvisited neighbor Cells of current Cell.
+     */
+    private List<Cell> checkNeighbors(int theRow, int theCol) {
+        List<Cell> res = new ArrayList<>();
 
+        // Top Cell not visited yet.
+        if (theRow >= 2 && !myMaze[theRow-2][theCol].isVisited)
+            res.add(myMaze[theRow-2][theCol]);
 
+        // Down Cell not visited yet.
+        if (theRow < (myRow-2) && !myMaze[theRow+2][theCol].isVisited)
+            res.add(myMaze[theRow+2][theCol]);
 
+        // Left Cell not visited yet.
+        if (theCol >= 2 && !myMaze[theRow][theCol-2].isVisited)
+            res.add(myMaze[theRow][theCol-2]);
 
+        // Right Cell not visited yet.
+        if (theCol < myCol-2 && !myMaze[theRow][theCol+2].isVisited)
+            res.add(myMaze[theRow][theCol+2]);
+
+        return res;
+    }
+
+    /**
+     * Draw the actual Maze.
+     */
+    public void drawMaze() {
+
+        for (int i=0; i<myRow; i++) {
+
+            for(int j=0; j<myCol; j++) {
+
+                // Broader but not starting point, and not ending point.
+                if (myMaze[i][j].isBorder ||
+                    !(myMaze[i][j].isVisited || myMaze[i][j].isPath) && !(myMaze[i][j].isStart || myMaze[i][j].isEnd)) {
+
+                    System.out.print("X ");
+                }
+
+                // Starting point.
+                else if (myMaze[i][j].isStart) System.out.print("S ");
+
+                // Ending point.
+                else if (myMaze[i][j].isEnd) System.out.print("E ");
+
+                // Show solution.
+                else if (mySolution.contains(myMaze[i][j]) && myDebug)
+                    System.out.print("* ");
+
+                else System.out.print("  ");
+            }
+            System.out.println();
+
+        }
+        System.out.println();
+    }
 
     /**
      * Private class for individual maze cell.
@@ -122,7 +241,7 @@ public class Maze {
 
         private boolean isBorder;
 
-        private boolean isVisted;
+        private boolean isVisited;
 
         private boolean isStart;
 
@@ -141,7 +260,7 @@ public class Maze {
             row = theRow;
             col = theCol;
             isBorder = theBorder;
-            isVisted = false;
+            isVisited = false;
             isStart = false;
             isEnd = false;
             isPath = false;
